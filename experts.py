@@ -20,6 +20,7 @@ def getData():
 # return an array of weights assigned to each expert based on their
 # previous records
 def getExpertWeights(data):
+    # experts start at index 1 to be consistent with table
     weights = [-1]
     records = data[-1]
     for record in records[1:]:
