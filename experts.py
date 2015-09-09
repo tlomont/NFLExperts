@@ -3,6 +3,10 @@ import requests
 import random
 import bisect
 
+# a relatively small penalty per incorrect guess, 
+# since we expect there to be many by the end of the season
+PENALTY = (31.0/32)
+
 # get the expert picks from ESPN and return the table of picks
 def getData():
     data = []
@@ -10,7 +14,6 @@ def getData():
     soup = BeautifulSoup(requests.get(URL).text) 
     table = soup.find('table')
     table_body = table.find('tbody')
-
     rows = table_body.find_all('tr')
     for row in rows:
         cols = row.find_all('td')
@@ -24,8 +27,8 @@ def getExpertWeights(data):
     weights = [0]
     records = data[-1]
     for record in records[1:]:
-        numIncorrect = int(record[2].split('-')[1])
-        weight =  pow((31.0/32), numIncorrect)
+        numIncorrect = int(record[2].split('-')[1]) # gets num incorrect
+        weight =  pow(PENALTY, numIncorrect)
         weights.append(weight)
     return weights
 
@@ -33,7 +36,6 @@ def getExpertWeights(data):
 # returning the experts index
 # use this expert to make the pick
 def chooseExpert(weights):
-    print weights
     cumWeights = []
     total = 0
     for weight in weights:
@@ -51,7 +53,6 @@ picks = []
 # there are 3 rows above and two below the actual game picks
 for game in pickData[3:-2]:
     expert = chooseExpert(weights)
-    print expert
     pick = game[expert] 
     #TODO: convert to actual team name? See format once picks released
     picks.append(pick)
