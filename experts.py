@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+from random import random
 
 def getData():
     data = []
@@ -23,6 +24,8 @@ def getExpertWeights(data):
         weights.append(weight)
     return weights
 
-
-
-print getExpertWeights(getData())
+def decidePick(team1, sumOfWeights1, team2, sumOfWeights2):
+    probablityTeam1 = sumOfWeights1/(sumOfWeights1+sumOfWeights2)
+    if (random() < probablityTeam1):
+        return team1
+    return team2
