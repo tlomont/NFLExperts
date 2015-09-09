@@ -1,12 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 
-URL = 'http://espn.go.com/nfl/picks'
-soup = BeautifulSoup(requests.get(URL).text)
-
-
 def getData():
     data = []
+    URL = 'http://espn.go.com/nfl/picks'
+    soup = BeautifulSoup(requests.get(URL).text) 
     table = soup.find('table')
     table_body = table.find('tbody')
 
