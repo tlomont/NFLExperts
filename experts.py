@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import random
-from bisect import bisect
+import bisect
 
 # get the expert picks from ESPN and return the table of picks
 def getData():
@@ -21,7 +21,7 @@ def getData():
 # previous records
 def getExpertWeights(data):
     # experts start at index 1 to be consistent with table
-    weights = [-1]
+    weights = [0]
     records = data[-1]
     for record in records[1:]:
         numIncorrect = int(record[2].split('-')[1])
@@ -33,6 +33,7 @@ def getExpertWeights(data):
 # returning the experts index
 # use this expert to make the pick
 def chooseExpert(weights):
+    print weights
     cumWeights = []
     total = 0
     for weight in weights:
@@ -44,6 +45,17 @@ def chooseExpert(weights):
     expert = bisect.bisect_left(cumWeights, randomChoice)
     return expert
 
+pickData = getData()
+weights = getExpertWeights(pickData)
+picks = []
+# there are 3 rows above and two below the actual game picks
+for game in pickData[3:-2]:
+    expert = chooseExpert(weights)
+    print expert
+    pick = game[expert] 
+    #TODO: convert to actual team name? See format once picks released
+    picks.append(pick)
+print picks
 
 
     
