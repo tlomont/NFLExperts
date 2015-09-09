@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
-from random import random
+import random
+from bisect import bisect
 
+# get the expert picks from ESPN and return the table of picks
 def getData():
     data = []
     URL = 'http://espn.go.com/nfl/picks'
@@ -15,6 +17,8 @@ def getData():
         data.append([col.contents for col in cols])
     return data
 
+# return an array of weights assigned to each expert based on their
+# previous records
 def getExpertWeights(data):
     weights = [-1]
     records = data[-1]
@@ -24,8 +28,21 @@ def getExpertWeights(data):
         weights.append(weight)
     return weights
 
-def decidePick(team1, sumOfWeights1, team2, sumOfWeights2):
-    probablityTeam1 = sumOfWeights1/(sumOfWeights1+sumOfWeights2)
-    if (random() < probablityTeam1):
-        return team1
-    return team2
+# randomly choose an expert using their weights as probablities, 
+# returning the experts index
+# use this expert to make the pick
+def chooseExpert(weights):
+    cumWeights = []
+    total = 0
+    for weight in weights:
+        total += weight
+        cumWeights.append(total)
+    randomChoice = random.uniform(0, total)
+    # choose the expert whose cumWeight is the greatest that is 
+    # <= the random number
+    expert = bisect.bisect_left(cumWeights, randomChoice)
+    return expert
+
+
+
+    
