@@ -11,8 +11,8 @@ import os
 # a relatively small penalty per incorrect guess, 
 # since we expect there to be many by the end of the season. For example
 # if an expert gets 50% correct in week one, then their weight will go 
-# down by almost 25% that week
-PENALTY = (31.0/32)
+# down by almost 60% that week
+PENALTY = (8.0/9)
 
 # this gets the picks and then sends an email containing the week's games
 def main():
