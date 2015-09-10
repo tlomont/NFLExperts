@@ -2,12 +2,30 @@ from bs4 import BeautifulSoup
 import requests
 import random
 import bisect
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from datetime import date
+import os
 
 # a relatively small penalty per incorrect guess, 
 # since we expect there to be many by the end of the season. For example
 # if an expert gets 50% correct in week one, then their weight will go 
 # down by almost 25% that week
 PENALTY = (31.0/32)
+
+def main():
+    pickData = getData()
+    weights = getExpertWeights(pickData)
+    picks = []
+    # there are 3 rows above and two below the actual game picks
+    for game in pickData[3:-2]:
+        expert = chooseExpert(weights)
+        pick = game[expert]
+        matchup = game[0][0].text
+        # gets the team name from the html and adds it to the list of picks
+        picks.append([matchup, pick[1].text if len(pick) > 1 else pick[0]]) 
+    sendEmail(picks)   
 
 # get the expert picks from ESPN and return the table of picks
 def getData():
@@ -49,17 +67,54 @@ def chooseExpert(weights):
     expert = bisect.bisect_left(cumWeights, randomChoice)
     return expert
 
-pickData = getData()
-weights = getExpertWeights(pickData)
-picks = []
-# there are 3 rows above and two below the actual game picks
-for game in pickData[3:-2]:
-    expert = chooseExpert(weights)
-    pick = game[expert]
-    matchup = game[0][0].text
-    # gets the team name from the html and adds it to the list of picks
-    picks.append([matchup, pick[1].text if len(pick) > 1 else pick[0]])
-print picks
+# sends the email with the weekly picks
+def sendEmail(picks):
+    # me == my email address
+    # you == recipient's email address
+    me = "nflexpertalgorithm@gmail.com"
+    recipients = ["tommy.lomont@gmail.com"]
 
+    # Create message container - the correct MIME type is multipart/alternative.
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = "Weekly NFL Expert Picks! - " + str(date.today())
+    msg['From'] = "NFL Expert Picks"
+    msg['To'] = ", ".join(recipients)
 
-    
+    # Create the body of the message (a plain-text and an HTML version).
+    text = ''
+    html = """\
+    <html>
+      <head></head>
+      <body><h2> This week's NFL picks</h2>
+    """
+    for game in picks:
+        text+= game[0] + ": " + game[1] + "\n"
+        html += "<p><b>" + game[0] + ": </b>" + game[1] + "</p>"
+
+    html+="""
+      </body>
+    </html>
+    """
+
+    # Record the MIME types of both parts - text/plain and text/html.
+    part1 = MIMEText(text, 'plain')
+    part2 = MIMEText(html, 'html')
+
+    # Attach parts into message container.
+    # According to RFC 2046, the last part of a multipart message, in this case
+    # the HTML message, is best and preferred.
+    msg.attach(part1)
+    msg.attach(part2)
+
+    # Send the message via local SMTP server.
+    server = smtplib.SMTP('smtp.gmail.com:587')
+    username = 'nflexpertalgorithm@gmail.com'  
+    password = os.environ.get('NFLPASS') # must set enviro variable
+    server.ehlo()
+    server.starttls()  
+    server.login(username,password)  
+    server.sendmail(me, recipients, msg.as_string())         
+    server.quit()
+
+if __name__ == "__main__":
+    main()
