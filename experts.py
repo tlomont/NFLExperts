@@ -4,7 +4,9 @@ import random
 import bisect
 
 # a relatively small penalty per incorrect guess, 
-# since we expect there to be many by the end of the season
+# since we expect there to be many by the end of the season. For example
+# if an expert gets 50% correct in week one, then their weight will go 
+# down by almost 25% that week
 PENALTY = (31.0/32)
 
 # get the expert picks from ESPN and return the table of picks
@@ -53,9 +55,9 @@ picks = []
 # there are 3 rows above and two below the actual game picks
 for game in pickData[3:-2]:
     expert = chooseExpert(weights)
-    pick = game[expert] 
-    #TODO: convert to actual team name? See format once picks released
-    picks.append(pick)
+    pick = game[expert]
+    # gets the team name from the html and adds it to the list of picks
+    picks.append(pick[1].text if len(pick) > 1 else pick[0])
 print picks
 
 
