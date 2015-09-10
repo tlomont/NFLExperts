@@ -34,7 +34,7 @@ def getExpertWeights(data):
         weights.append(weight)
     return weights
 
-# randomly choose an expert using their weights as probablities, 
+# randomly choose an expert using their weights as probabilities, 
 # returning the experts index
 # use this expert to make the pick
 def chooseExpert(weights):
@@ -56,8 +56,9 @@ picks = []
 for game in pickData[3:-2]:
     expert = chooseExpert(weights)
     pick = game[expert]
+    matchup = game[0][0].text
     # gets the team name from the html and adds it to the list of picks
-    picks.append(pick[1].text if len(pick) > 1 else pick[0])
+    picks.append([matchup, pick[1].text if len(pick) > 1 else pick[0]])
 print picks
 
 
