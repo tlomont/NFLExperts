@@ -14,6 +14,7 @@ import os
 # down by almost 25% that week
 PENALTY = (31.0/32)
 
+# this gets the picks and then sends an email containing the week's games
 def main():
     pickData = getData()
     weights = getExpertWeights(pickData)
