@@ -24,13 +24,15 @@ def main():
         expert = chooseExpert(weights)
         pick = game[expert]
         # sometimes certain experts don't pick for certain games
-        # we'll just re-choose experts
-        while pick == 'No pick.':
+        # we'll just re-choose experts, but put a flag in the email
+        noPickFlag = False
+        while pick[0] == 'No pick.':
+            noPickFlag = True
             pick = game[chooseExpert(weights)]
         matchup = game[0][0].text
         # gets the team name from the html and adds it to the list of picks
         picks.append([matchup, pick[1].text if len(pick) > 1 else pick[0]]) 
-    sendEmail(picks)   
+    sendEmail(picks, noPickFlag)   
 
 # get the expert picks from ESPN and return the table of picks
 def getData():
@@ -73,7 +75,7 @@ def chooseExpert(weights):
     return expert
 
 # sends the email with the weekly picks
-def sendEmail(picks):
+def sendEmail(picks, noPickFlag=False):
     # me == my email address
     # you == recipient's email address
     me = "nflexpertalgorithm@gmail.com"
@@ -92,6 +94,10 @@ def sendEmail(picks):
       <head></head>
       <body><h2> This week's NFL picks</h2>
     """
+
+    if noPickFlag:
+        html+= "<b>A 'NO PICK' WAS DISCOVERED AND NOT CHOSEN</b>"
+
     for game in picks:
         text+= game[0] + ": " + game[1] + "\n"
         html += "<p><b>" + game[0] + ": </b>" + game[1] + "</p>"
