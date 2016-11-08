@@ -118,14 +118,15 @@ def sendEmail(picks, noPickFlag=False):
     msg.attach(part2)
 
     # Send the message via local SMTP server.
-    server = smtplib.SMTP('smtp.gmail.com:587')
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
     username = 'nflexpertalgorithm@gmail.com'  
     password = os.environ.get('NFLPASS') # must set enviro variable
-    server.ehlo()
-    server.starttls()  
     server.login(username,password)  
     server.sendmail(me, recipients, msg.as_string())         
-    server.quit()
+    server.close()
 
 if __name__ == "__main__":
     main()
