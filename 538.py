@@ -12,7 +12,6 @@ import os
 def main():
     (away_probs, away_teams, home_teams) = getData()
     picks = []
-    # there are 3 rows above and two below the actual game picks
     for i in range(0,len(away_probs)):
         prob = float(away_probs[i].text[:-1])/100
         if (random.random() < prob):
@@ -20,11 +19,10 @@ def main():
         else:
             pick = home_teams[i].text
         matchup = "%s vs. %s" % (away_teams[i].text, home_teams[i].text)
-        # gets the team name from the html and adds it to the list of picks
         picks.append([matchup, pick]) 
     sendEmail(picks)   
 
-# get the expert picks from ESPN and return the table of picks
+# get the probabilities and matchups from 538
 def getData():
     data = []
     URL = 'http://projects.fivethirtyeight.com/2016-nfl-predictions/'
