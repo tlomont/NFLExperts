@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
 import random
-import bisect
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -10,27 +9,26 @@ import os
 
 # this gets the picks and then sends an email containing the week's games
 def main():
-    (away_probs, away_teams, home_teams) = getData()
+    games = getData()
     picks = []
-    for i in range(0,len(away_probs)):
-        prob = float(away_probs[i].text[:-1])/100
-        if (random.random() < prob):
-            pick = away_teams[i].text
+    for i in range(0,len(games)):
+        first_prob = float(games[i].find(attrs={'class':"td number chance"}).text[:-1])
+        teams = map(lambda x: x.text.strip(), games[i].findAll(attrs={'class':"team"})[1:])
+        if (random.random()*100 < first_prob):
+            pick = teams[0]
         else:
-            pick = home_teams[i].text
-        matchup = "%s vs. %s" % (away_teams[i].text, home_teams[i].text)
+            pick = teams[1]
+        matchup = "%s vs. %s" % (teams[0], teams[1])
         picks.append([matchup, pick]) 
     sendEmail(picks)   
 
 # get the probabilities and matchups from 538
 def getData():
     data = []
-    URL = 'http://projects.fivethirtyeight.com/2016-nfl-predictions/'
+    URL = 'http://projects.fivethirtyeight.com/2017-nfl-predictions/games'
     soup = BeautifulSoup(requests.get(URL).text) 
-    away_probs = soup.findAll(attrs={'class':'prob away'})
-    away_teams = soup.find('tr',attrs={'class':'away'}).findAll(attrs={'class':'team'})
-    home_teams = soup.find('tr',attrs={'class':'home'}).findAll(attrs={'class':'team'})
-    return (away_probs, away_teams, home_teams)
+    games = soup.find(attrs={'class':'week'}).findAll(attrs={'class':'game'})
+    return (games)
 
 # sends the email with the weekly picks
 def sendEmail(picks):
